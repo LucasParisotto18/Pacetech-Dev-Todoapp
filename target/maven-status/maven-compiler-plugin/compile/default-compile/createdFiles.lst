@@ -1,0 +1,8 @@
+model\Task.class
+controller\ProjectController.class
+view\MainScreen.class
+util\ConnectionFactory.class
+com\mycompany\todoapp2\TodoApp2.class
+model\Project.class
+controller\TaskController.class
+view\MainScreen$1.class
