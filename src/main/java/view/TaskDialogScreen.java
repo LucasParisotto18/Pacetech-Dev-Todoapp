@@ -183,7 +183,7 @@ public class TaskDialogScreen extends javax.swing.JDialog {
         
         try {
           Task task = new Task();  
-          task.setIdProject(12); // id project chave estrangeira 
+          task.setIdProject(project.getId()); // id project chave estrangeira 
           task.setName(jTextFieldName.getText());
           task.setDescription(jTextAreaDescription.getText());
           task.setNotes(jTextAreaNotes.getText());
@@ -191,7 +191,7 @@ public class TaskDialogScreen extends javax.swing.JDialog {
           task.setUpdatedAt(new Date()); ////////////********
           
           SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/y"); /////////////*****
-          Date deadline = null;                                    // transformar data tipo string para date
+          Date deadline = null;                                         // transformar data tipo string para date
           deadline = dateFormat.parse(jFormattedTextFielddeadline.getText());
           task.setDeadline(deadline);
           
