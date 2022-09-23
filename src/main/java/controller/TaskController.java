@@ -150,5 +150,42 @@ public class TaskController {
         
     }
     
-    
+    public Task getById (int id) throws SQLException{
+        String sql = "SELECT * FROM TASKS WHERE id = ?";
+        
+        Connection conn = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        
+        try {
+            conn = ConnectionFactory.getConnection();
+            statement = conn.prepareStatement(sql);
+            
+            
+            statement.setInt(1, id);
+            resultSet = statement.executeQuery();
+            
+            if (resultSet.next()){
+                Task task = new Task();
+                
+                task.setId(resultSet.getInt("id"));
+                task.setIdProject(resultSet.getInt("idProject"));
+                task.setName(resultSet.getString("name"));
+                task.setDescription(resultSet.getString("description"));
+                task.setNotes(resultSet.getString("notes"));
+                task.setIsCompleted(resultSet.getBoolean("completed"));
+                task.setDeadline(resultSet.getDate("deadline"));
+                task.setCreatedAt(resultSet.getDate("createdAt"));
+                task.setUpdatedAt(resultSet.getDate("updatedAt"));
+                
+                return task;  
+            }
+            return new Task(); 
+            
+        } catch (SQLException e) {
+            throw new SQLException("Erro ao tentar buscar o id da tarefa no banco de dados" + e.getMessage(), e);
+        } finally {
+            ConnectionFactory.closeConnection(conn, statement, resultSet);
+    }
+   }
 }

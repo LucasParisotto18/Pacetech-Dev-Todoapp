@@ -10,10 +10,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import model.Project;
 import model.Task;
+import util.ButtonColumnCellRederer;
+import util.DeadlineColumnCellRederer;
 import util.TaskTableModel;
 
 /**
@@ -26,14 +30,13 @@ public class MainScreen extends javax.swing.JFrame {
     TaskController taskController;
     DefaultListModel projectsModel;
     TaskTableModel taskModel;
-    
-    
+
     public MainScreen() {
         initComponents();
-        decorateTableTask();
         initDataController();
         initComponetsModel();
-        
+        decorateTableTask(); //decorateTableTask tem q ficar dps de inicializar os dados (ComponentsModel e Datacontroller)
+
     }
 
     /**
@@ -320,71 +323,84 @@ public class MainScreen extends javax.swing.JFrame {
 
     private void jLabelProjectsAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelProjectsAddMouseClicked
         // TODO add your handling code here:
-      ProjectDialogScreen projectDialogScreen = new ProjectDialogScreen(this, rootPaneCheckingEnabled);
-      projectDialogScreen.setVisible(true); //abrir uma nova janela.
-      
-      projectDialogScreen.addWindowListener(new WindowAdapter(){
-          public void windowClosed(WindowEvent e){ //quando a janela for fechada...
-              loadProjects();//...vai executar oq tem nesse metodo
-          }
-      });
+        ProjectDialogScreen projectDialogScreen = new ProjectDialogScreen(this, rootPaneCheckingEnabled);
+        projectDialogScreen.setVisible(true); //abrir uma nova janela.
+
+        projectDialogScreen.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) { //quando a janela for fechada...
+                loadProjects();//...vai executar oq tem nesse metodo
+            }
+        });
     }//GEN-LAST:event_jLabelProjectsAddMouseClicked
 
     private void jLabelTasksAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelTasksAddMouseClicked
         // TODO add your handling code here:
-      TaskDialogScreen taskDialogScreen = new TaskDialogScreen(this, rootPaneCheckingEnabled);//cria nova janela
-      //taskDialogScreen.setProject(null); //seta o id do projeto
-      
-      int projectIndex = jListProjects.getSelectedIndex();
-      Project project = (Project) projectsModel.get(projectIndex);
-      taskDialogScreen.setProject(project);
-      
-      taskDialogScreen.setVisible(true); //abrir uma nova janela.
-      
-      taskDialogScreen.addWindowListener(new WindowAdapter(){
-          public void windowClosed(WindowEvent e){
-              int projectIndex = jListProjects.getSelectedIndex();
-              Project project = (Project) projectsModel.get(projectIndex);
-              loadTasks(project.getId());
-          }
-      });
+        TaskDialogScreen taskDialogScreen = new TaskDialogScreen(this, rootPaneCheckingEnabled);//cria nova janela
+        //taskDialogScreen.setProject(null); //seta o id do projeto
+
+        int projectIndex = jListProjects.getSelectedIndex();
+        Project project = (Project) projectsModel.get(projectIndex);
+        taskDialogScreen.setProject(project);
+
+        taskDialogScreen.setVisible(true); //abrir uma nova janela.
+
+        taskDialogScreen.addWindowListener(new WindowAdapter() {
+            public void windowClosed(WindowEvent e) {
+                int projectIndex = jListProjects.getSelectedIndex();
+                Project project = (Project) projectsModel.get(projectIndex);
+                loadTasks(project.getId());
+            }
+        });
     }//GEN-LAST:event_jLabelTasksAddMouseClicked
 
     private void jTableTasksMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableTasksMouseClicked
         // TODO add your handling code here:
-        
+
         //salvar no banci de dados
-       int rowIndex = jTableTasks.rowAtPoint(evt.getPoint()); //descobre qual a linha que aconteceu o evento de click
-       int columnIndex = jTableTasks.columnAtPoint(evt.getPoint());//descobre qual a coluna que aconteceu o evento de click
-       Task task = taskModel.getTasks().get(rowIndex);
-       
-       switch (columnIndex){
-          case 3:
-               taskController.update(task);    //salva no banco
-              break;
-              
-           case 4:
-               break;
-               
-           case 5: //remover tarefa
-               taskController.removeById(task.getId());
-               taskModel.getTasks().remove(task);
-               int projectIndex = jListProjects.getSelectedIndex();
-               Project project = (Project) projectsModel.get(projectIndex);
-               loadTasks(project.getId());
-               break;
-       }
-        
+        int rowIndex = jTableTasks.rowAtPoint(evt.getPoint()); //descobre qual a linha que aconteceu o evento de click
+        int columnIndex = jTableTasks.columnAtPoint(evt.getPoint());//descobre qual a coluna que aconteceu o evento de click
+        Task task = taskModel.getTasks().get(rowIndex);
+
+        switch (columnIndex) {
+            case 3:
+                taskController.update(task);    //salva no banco
+                break;
+
+            case 4:
+
+                int id = task.getId();
+
+                TaskDialogScreen taskDialogScreen = new TaskDialogScreen(this, rootPaneCheckingEnabled);
+                
+                Task resultTask = taskController.getById(id);
+                taskDialogScreen.setTask(task);
+                int projectIndexz = jListProjects.getSelectedIndex();
+                Project projectz = (Project) projectsModel.get(projectIndexz);
+                taskDialogScreen.setProject(projectz);
+                taskDialogScreen.setVisible(true);
+                loadTasks(projectz.getId());
+    
+                break;
+
+            case 5: //remover tarefa
+                taskController.removeById(task.getId());
+                taskModel.getTasks().remove(task);
+                int projectIndex = jListProjects.getSelectedIndex();
+                Project project = (Project) projectsModel.get(projectIndex);
+                loadTasks(project.getId());
+                break;
+        }
+
     }//GEN-LAST:event_jTableTasksMouseClicked
 
     private void jListProjectsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jListProjectsMouseClicked
         // TODO add your handling code here:
-        
+
         int projectIndex = jListProjects.getSelectedIndex();
         Project project = (Project) projectsModel.get(projectIndex); //selecionar o id do projeto cm click e 
         loadTasks(project.getId());                                 // carregar as respectivas tasks
-        
-        
+
+
     }//GEN-LAST:event_jListProjectsMouseClicked
 
     /**
@@ -444,56 +460,61 @@ public class MainScreen extends javax.swing.JFrame {
     private javax.swing.JTable jTableTasks;
     // End of variables declaration//GEN-END:variables
 
-    public void decorateTableTask(){
-        
+    public void decorateTableTask() {
+
         // colocando cor verde no header(nome das colunas - 1 linha) na task
-        jTableTasks.getTableHeader().setFont(new Font("Verdana", Font.BOLD, 14) );
-        jTableTasks.getTableHeader().setBackground(new Color (0,153,102));
-        jTableTasks.getTableHeader().setForeground(new Color (255, 255, 255));
-        
-        jTableTasks.setAutoCreateRowSorter(true); //permite ordenar a coluna por data/ordem alfabetica.
+        jTableTasks.getTableHeader().setFont(new Font("Verdana", Font.BOLD, 14));
+        jTableTasks.getTableHeader().setBackground(new Color(0, 153, 102));
+        jTableTasks.getTableHeader().setForeground(new Color(255, 255, 255));
+        jTableTasks.getColumnModel().getColumn(2).setCellRenderer(new DeadlineColumnCellRederer()); //pega a coluna 2 e seta o cellrender q eu implementei
+
+        jTableTasks.getColumnModel().getColumn(4).setCellRenderer(new ButtonColumnCellRederer("pencil")); //add botao caneta
+        jTableTasks.getColumnModel().getColumn(5).setCellRenderer(new ButtonColumnCellRederer("close")); //add botao x
+
+        //jTableTasks.setAutoCreateRowSorter(true); //permite ordenar a coluna por data/ordem alfabetica.
     }
-    
-    public void initDataController(){
+
+    public void initDataController() {
         projectController = new ProjectController();
         taskController = new TaskController();
-        
+
     }
-    public void initComponetsModel(){
+
+    public void initComponetsModel() {
         projectsModel = new DefaultListModel();
         loadProjects();
-        
+
         taskModel = new TaskTableModel();//faz com q se exiba as tabelas do tasktablemodel na tabela do desing
         jTableTasks.setModel(taskModel);
-        
-        if (!projectsModel.isEmpty()){
+
+        if (!projectsModel.isEmpty()) {
             jListProjects.setSelectedIndex(0);
             Project project = (Project) projectsModel.get(0);
             loadTasks(project.getId());
         }
     }
-    
-    public void loadTasks(int idProject){
-       List<Task> tasks = taskController.getAll(idProject);
-       taskModel.setTasks(tasks);
-       showJTableTasks(!tasks.isEmpty()); //vai enviar pra showJTableTasks se a lista "nao esta vazia?"
+
+    public void loadTasks(int idProject) {
+        List<Task> tasks = taskController.getAll(idProject);
+        taskModel.setTasks(tasks);
+        showJTableTasks(!tasks.isEmpty()); //vai enviar pra showJTableTasks se a lista "nao esta vazia?"
     }
-    
-    private void showJTableTasks (boolean hasTask){
+
+    private void showJTableTasks(boolean hasTask) {
         if (hasTask) { //verificar se existem tarefas
-            
-                              //se existirem
-            if (jPanelEmptyList.isVisible()){
+
+            //se existirem
+            if (jPanelEmptyList.isVisible()) {
                 jPanelEmptyList.setVisible(false);//tirar a tela "nao tem nd por aqui"
                 jPanel5.remove(jPanelEmptyList);
             }
-            
+
             jPanel5.add(jScrollPaneTasks);//coloca as tarefas no panel5
             jScrollPaneTasks.setVisible(true);
-            jScrollPaneTasks.setSize(jPanel5.getWidth(), jPanel5.getHeight());   
+            jScrollPaneTasks.setSize(jPanel5.getWidth(), jPanel5.getHeight());
         } else {
-                    //se nao tiver tarefas
-            if (jScrollPaneTasks.isVisible()){
+            //se nao tiver tarefas
+            if (jScrollPaneTasks.isVisible()) {
                 jScrollPaneTasks.setVisible(false);
                 jPanel5.remove(jScrollPaneTasks);
             }
@@ -502,18 +523,17 @@ public class MainScreen extends javax.swing.JFrame {
             jPanelEmptyList.setSize(jPanel5.getWidth(), jPanel5.getHeight());
         }
     }
-    
-    
-    public void loadProjects(){
-        
+
+    public void loadProjects() {
+
         List<Project> projects = projectController.getAll();
         projectsModel.clear();
-        
-        for (int i = 0; i < projects.size(); i++ ){
+
+        for (int i = 0; i < projects.size(); i++) {
             Project project = projects.get(i);
             projectsModel.addElement(project);
         }
-       jListProjects.setModel(projectsModel);
-    } 
-    
+        jListProjects.setModel(projectsModel);
+    }
+
 }
